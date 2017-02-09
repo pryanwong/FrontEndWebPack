@@ -1,114 +1,63 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
+import { NgModule }      from '@angular/core';
 import { HttpModule } from '@angular/http';
-import {
-  NgModule,
-  ApplicationRef
-} from '@angular/core';
-import {
-  removeNgStyles,
-  createNewHosts,
-  createInputTransfer
-} from '@angularclass/hmr';
-import {
-  RouterModule,
-  PreloadAllModules
-} from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
+import { BrowserModule } from '@angular/platform-browser';
+import {NgsRevealModule} from 'ng2-scrollreveal';
+import { AppComponent }        from './app.component';
+import { HeaderComponent } from './header.component';
+import { HomeComponent } from './home.component';
+import { FooterComponent } from './footer.component';
+import { NavBarNoLoginComponent } from './navbar_nologin.component'
+import { NavBarLoggedInComponent} from './navbar_login.component'
+import { routing } from './app.routes';
+import { WindowRef } from './WindowRef';
+import { Angular2TokenService , A2tUiModule } from 'angular2-token';
 
-/*
- * Platform and Environment providers/directives/pipes
- */
-import { ENV_PROVIDERS } from './environment';
-import { ROUTES } from './app.routes';
-// App is our top level component
-import { AppComponent } from './app.component';
-import { APP_RESOLVER_PROVIDERS } from './app.resolver';
-import { AppState, InternalStateType } from './app.service';
-import { HomeComponent } from './home';
-import { AboutComponent } from './about';
-import { NoContentComponent } from './no-content';
-import { XLargeDirective } from './home/x-large';
-
-import '../styles/styles.scss';
-import '../styles/headings.css';
-
-// Application wide providers
-const APP_PROVIDERS = [
-  ...APP_RESOLVER_PROVIDERS,
-  AppState
-];
-
-type StoreType = {
-  state: InternalStateType,
-  restoreInputValues: () => void,
-  disposeOldHosts: () => void
-};
-
-/**
- * `AppModule` is the main entry point into Angular2's bootstraping process
- */
 @NgModule({
-  bootstrap: [ AppComponent ],
-  declarations: [
-    AppComponent,
-    AboutComponent,
-    HomeComponent,
-    NoContentComponent,
-    XLargeDirective
-  ],
-  imports: [ // import Angular's modules
-    BrowserModule,
-    FormsModule,
-    HttpModule,
-    RouterModule.forRoot(ROUTES, { useHash: true, preloadingStrategy: PreloadAllModules })
-  ],
-  providers: [ // expose our Services and Providers into Angular's dependency injection
-    ENV_PROVIDERS,
-    APP_PROVIDERS
-  ]
+  imports:      [ BrowserModule, routing, NgsRevealModule.forRoot(), HttpModule, RouterModule],
+  declarations: [ AppComponent, HeaderComponent, HomeComponent, FooterComponent, NavBarNoLoginComponent, NavBarLoggedInComponent ],
+  bootstrap:    [ AppComponent ],
+  providers:    [ WindowRef, Angular2TokenService  ]
+
 })
 export class AppModule {
+   constructor(private _tokenService: Angular2TokenService) {
+      this._tokenService.init({
+        apiBase:                    'http://localhost:3100',
+        apiPath:                    'v1',
 
-  constructor(
-    public appRef: ApplicationRef,
-    public appState: AppState
-  ) {}
+        signInPath:                 'auth/sign_in',
+        signInRedirect:             null,
+        signInStoredUrlStorageKey:  null,
 
-  public hmrOnInit(store: StoreType) {
-    if (!store || !store.state) {
-      return;
-    }
-    console.log('HMR store', JSON.stringify(store, null, 2));
-    // set state
-    this.appState._state = store.state;
-    // set input values
-    if ('restoreInputValues' in store) {
-      let restoreInputValues = store.restoreInputValues;
-      setTimeout(restoreInputValues);
-    }
+        signOutPath:                'auth/sign_out',
+        validateTokenPath:          'auth/validate_token',
+        signOutFailedValidate:      false,
 
-    this.appRef.tick();
-    delete store.state;
-    delete store.restoreInputValues;
-  }
+        registerAccountPath:        'auth',
+        deleteAccountPath:          'auth',
+        registerAccountCallback:    window.location.href,
 
-  public hmrOnDestroy(store: StoreType) {
-    const cmpLocation = this.appRef.components.map((cmp) => cmp.location.nativeElement);
-    // save state
-    const state = this.appState._state;
-    store.state = state;
-    // recreate root elements
-    store.disposeOldHosts = createNewHosts(cmpLocation);
-    // save input values
-    store.restoreInputValues  = createInputTransfer();
-    // remove styles
-    removeNgStyles();
-  }
+        updatePasswordPath:         'auth',
+        resetPasswordPath:          'auth/password',
+        resetPasswordCallback:      window.location.href,
 
-  public hmrAfterDestroy(store: StoreType) {
-    // display new elements
-    store.disposeOldHosts();
-    delete store.disposeOldHosts;
-  }
+        oAuthHost:                  window.location.origin,
+        oAuthPaths: {
+            github:                 'auth/github'
+        },
+        oAuthCallbackPath:          'oauth_callback',
+        oAuthWindowType:            'sameWindow',
+        oAuthWindowOptions:         null,
 
+        userTypes:                  null,
+
+        globalOptions: {
+            headers: {
+                'Content-Type':     'application/json',
+                'Accept':           'application/json'
+            }
+        }
+    });
+   }
 }

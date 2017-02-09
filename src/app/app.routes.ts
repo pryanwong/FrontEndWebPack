@@ -1,15 +1,28 @@
-import { Routes } from '@angular/router';
-import { HomeComponent } from './home';
-import { AboutComponent } from './about';
-import { NoContentComponent } from './no-content';
+import { ModuleWithProviders }  from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
 
-import { DataResolver } from './app.resolver';
+import { HeaderComponent } from './header.component';
+import { FooterComponent } from './footer.component';
+import { HomeComponent } from './home.component';
 
-export const ROUTES: Routes = [
-  { path: '',      component: HomeComponent },
-  { path: 'home',  component: HomeComponent },
-  { path: 'about', component: AboutComponent },
-  { path: 'detail', loadChildren: './+detail#DetailModule'},
-  { path: 'barrel', loadChildren: './+barrel#BarrelModule'},
-  { path: '**',    component: NoContentComponent },
+import { NavBarNoLoginComponent } from './navbar_nologin.component'
+import { NavBarLoggedInComponent} from './navbar_login.component'
+
+export const routes: Routes = [
+ { path: '', redirectTo: 'home', pathMatch: 'full' },
+ { path: 'loggedin', children:[
+     { path: '', component: NavBarNoLoginComponent, outlet: 'navbar'},
+     { path: '' , component: HeaderComponent, outlet: 'header'},
+     { path: '' , component: FooterComponent, outlet: 'footer'}
+  ]},
+ { path: 'home', children:[
+     { path: '', component: NavBarLoggedInComponent, outlet: 'navbar'},
+     { path: '', component: HomeComponent}
+  ]},
+ { path: 'about', component: FooterComponent },
+ { path: 'contact', component: HeaderComponent },
+ { path: 'contactus', redirectTo: 'contact' },
+ // { path: '**', redirectTo: 'home'}
 ];
+
+export const routing: ModuleWithProviders = RouterModule.forRoot(routes);

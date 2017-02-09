@@ -2,6 +2,9 @@
  * @author: @AngularClass
  */
 
+ resolveLoader: {
+   root: path.join(__dirname, 'node_modules')
+ },
 // Look in ./config folder for webpack.dev.js
 switch (process.env.NODE_ENV) {
   case 'prod':
